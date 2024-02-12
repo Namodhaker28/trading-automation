@@ -19,12 +19,12 @@ const binance = new Binance().options({
   APISECRET: "4NmUo9uPGIgmurx58pbiHhDY9cr13whM3EWrD2ga9Rg07uB3ZTw3RYF7gPHp46rV",
 });
 
-const profitTarget = 50;
+const profitTarget = 250;
 const btcAmount = 0.005;
 let quantity;
 
 const automation = async () => {
-    bot.sendMessage(chatId,"Server running")
+
   const tradeType = JSON.parse(fs.readFileSync("data.json", "utf-8")).side;
 
   try {
