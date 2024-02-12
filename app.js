@@ -19,12 +19,11 @@ const binance = new Binance().options({
   APISECRET: "4NmUo9uPGIgmurx58pbiHhDY9cr13whM3EWrD2ga9Rg07uB3ZTw3RYF7gPHp46rV",
 });
 
-const profitTarget = 50;
+const profitTarget = 250;
 const btcAmount = 0.005;
-let quantity;
+let quantity = btcAmount;
 
 const automation = async () => {
-    bot.sendMessage(chatId,"Server running")
   const tradeType = JSON.parse(fs.readFileSync("data.json", "utf-8")).side;
 
   try {
@@ -36,14 +35,15 @@ const automation = async () => {
     // console.log(openPosition)
 
     if (sma15 > sma35) {
-      if (tradeType === "long" && Number(openPosition[0].positionAmt)) {
-        console.log("alredy long position is open");
+      if (tradeType === "long") {
+        console.log("alredy long ");
         return;
-      }
-      if (tradeType === "short" && Number(openPosition[0].positionAmt)) {
-        quantity = Number(openPosition[0].positionAmt) * 2;
       } else {
-        quantity = btcAmount;
+        if (Number(openPosition[0].positionAmt)) {
+          quantity = Number(openPosition[0].positionAmt) * 2;
+        } else {
+          quantity = btcAmount;
+        }
       }
 
       const broughtOrder = await binance.futuresMarketBuy("BTCUSDT", quantity, { newOrderRespType: "RESULT" });
@@ -58,14 +58,15 @@ const automation = async () => {
       bot.sendMessage(chatId, `Trade Placed: ${broughtOrder.avgPrice}  ( ${broughtOrder.origQty} )  \n TP : ${tpOrder.stopPrice} `);
       fs.writeFileSync("data.json", JSON.stringify({ side: "long" }, null, 2));
     } else {
-      if (tradeType === "short" && Number(openPosition[0].positionAmt)) {
-        console.log("alredy short position is open");
+      if (tradeType === "short") {
+        console.log("alredy short ");
         return;
-      }
-      if (tradeType === "long" && Number(openPosition[0].positionAmt)) {
-        quantity = Number(openPosition[0].positionAmt) * 2;
       } else {
-        quantity = btcAmount;
+        if (Number(openPosition[0].positionAmt)) {
+          quantity = Number(openPosition[0].positionAmt) * 2;
+        } else {
+          quantity = btcAmount;
+        }
       }
 
       const shortOrder = await binance.futuresMarketSell("BTCUSDT", quantity, { newOrderRespType: "RESULT" });
