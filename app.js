@@ -19,7 +19,7 @@ const binance = new Binance().options({
   APISECRET: "4NmUo9uPGIgmurx58pbiHhDY9cr13whM3EWrD2ga9Rg07uB3ZTw3RYF7gPHp46rV",
 });
 
-const profitTarget = 200;
+const profitTarget = 50;
 const btcAmount = 0.005;
 let quantity;
 
@@ -88,5 +88,5 @@ const automation = async () => {
   }
 };
 
-const intervalId = setInterval(automation, 5 * 60 * 1000);
+const intervalId = setInterval(automation, 1 * 60 * 1000);
 automation();
