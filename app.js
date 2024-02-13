@@ -19,7 +19,7 @@ const binance = new Binance().options({
   APISECRET: "4NmUo9uPGIgmurx58pbiHhDY9cr13whM3EWrD2ga9Rg07uB3ZTw3RYF7gPHp46rV",
 });
 
-const profitTarget = 250;
+const profitTarget = 200;
 const btcAmount = 0.005;
 let quantity;
 
@@ -41,10 +41,13 @@ const automation = async () => {
         return;
       }
       if (tradeType === "short" && Number(openPosition[0].positionAmt)) {
-        quantity = Number(openPosition[0].positionAmt) * 2;
+        console.log(openPosition[0])
+        quantity = Number(openPosition[0].positionAmt) * 2 * -1;
       } else {
         quantity = btcAmount;
       }
+
+      console.log(quantity)
 
       const broughtOrder = await binance.futuresMarketBuy("BTCUSDT", quantity, { newOrderRespType: "RESULT" });
       console.log("broughtOrder", broughtOrder);
