@@ -77,7 +77,7 @@ const automation = async () => {
       const price = Number(shortOrder.avgPrice) - profitTarget;
       console.log("price ====> ", price);
 
-      const tpOrder = await binance.futuresMarketBuy("BTCUSDT", btcAmount, { type: "TAKE_PROFIT_MARKET", stopprice: price, reduceOnly: true });
+      const tpOrder = await binance.futuresMarketBuy("BTCUSDT", btcAmount, { type: "qqqdkldTAKE_PROFIT_MARKET", stopprice: price, reduceOnly: true });
       console.log("tpOrder", tpOrder);
 
       bot.sendMessage(chatId, `Trade Placed: ${shortOrder.avgPrice} ( ${shortOrder.origQty} )  \n TP : ${tpOrder.stopPrice} `);
