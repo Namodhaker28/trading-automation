@@ -19,7 +19,7 @@ const binance = new Binance().options({
   APISECRET: "4NmUo9uPGIgmurx58pbiHhDY9cr13whM3EWrD2ga9Rg07uB3ZTw3RYF7gPHp46rV",
 });
 
-const profitTarget = 50;
+const profitTarget = 250;
 const btcAmount = 0.005;
 let quantity;
 
@@ -28,8 +28,8 @@ const automation = async () => {
   const tradeType = JSON.parse(fs.readFileSync("data.json", "utf-8")).side;
 
   try {
-    const sma15 = await getSimpleMovingAverage("BTCUSDT", "15m", 15);
-    const sma35 = await getSimpleMovingAverage("BTCUSDT", "15m", 35);
+    const sma15 = await getSimpleMovingAverage("BTCUSDT", "15m", 7);
+    const sma35 = await getSimpleMovingAverage("BTCUSDT", "15m", 21);
     // console.log(sma15, sma35)
 
     const openPosition = await binance.futuresPositionRisk({ symbol: "BTCUSDT" });
@@ -77,7 +77,7 @@ const automation = async () => {
       const price = Number(shortOrder.avgPrice) - profitTarget;
       console.log("price ====> ", price);
 
-      const tpOrder = await binance.futuresMarketBuy("BTCUSDT", btcAmount, { type: "qqqdkldTAKE_PROFIT_MARKET", stopprice: price, reduceOnly: true });
+      const tpOrder = await binance.futuresMarketBuy("BTCUSDT", btcAmount, { type: "TAKE_PROFIT_MARKET", stopprice: price, reduceOnly: true });
       console.log("tpOrder", tpOrder);
 
       bot.sendMessage(chatId, `Trade Placed: ${shortOrder.avgPrice} ( ${shortOrder.origQty} )  \n TP : ${tpOrder.stopPrice} `);
