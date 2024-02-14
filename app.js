@@ -19,9 +19,29 @@ const binance = new Binance().options({
   APISECRET: "4NmUo9uPGIgmurx58pbiHhDY9cr13whM3EWrD2ga9Rg07uB3ZTw3RYF7gPHp46rV",
 });
 
-const profitTarget = 250;
-const btcAmount = 0.005;
+let profitTarget = 250;
+let btcAmount = 0.005;
 let quantity;
+
+bot.onText(/\/echo (.+)/, (msg, match) => {
+  // 'msg' is the received Message from Telegram
+  // 'match' is the result of executing the regexp above on the text content
+  // of the message
+
+  console.log("first message received", msg, match);
+
+  const chatId = msg.chat.id;
+  const resp = match[1]; // the captured "whatever"
+
+  // send back the matched "whatever" to the chat
+  bot.sendMessage(chatId, resp);
+});
+
+bot.on('message', (msg)=>{
+  console.log(msg)
+  profitTarget = Number(msg.text);
+  bot.sendMessage(chatId, `TP Updated to ${profitTarget} `);
+})
 
 const automation = async () => {
 
