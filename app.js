@@ -46,9 +46,9 @@ bot.on('message', (msg)=>{
 const automation = async () => {
 
   const tradeType = JSON.parse(fs.readFileSync("data.json", "utf-8")).side;
-  const cmp = await binance.futuresMarkPrice( "BTCUSDT" )
-  const cmpBtc = Number(cmp?.markPrice)
-  console.log("cmpBtc: ",cmpBtc)
+  // const cmp = await binance.futuresMarkPrice( "BTCUSDT" )
+  // const cmpBtc = Number(cmp?.markPrice)
+  // console.log("cmpBtc: ",cmpBtc)
 
   try {
     const sma15 = await getSimpleMovingAverage("BTCUSDT", "15m", 7);
@@ -56,7 +56,8 @@ const automation = async () => {
     // console.log(sma15, sma35)
 
     const openPosition = await binance.futuresPositionRisk({ symbol: "BTCUSDT" });
-    console.log(openPosition)
+    const cmpBtc = Number(openPosition[0]?.markPrice)
+    console.log(cmpBtc)
 
     if (sma15 > sma35) {
       if (tradeType === "long" && Number(openPosition[0]?.positionAmt)) {
@@ -70,15 +71,15 @@ const automation = async () => {
         quantity = btcAmount;
       }
 
-      console.log(quantity)
-
-      const broughtOrder = await binance.futuresBuy("BTCUSDT", quantity,cmpBtc, { newOrderRespType: "RESULT" });
+      const limitPrice =Math.floor(cmpBtc-5);
+      console.log(limitPrice)
+      const broughtOrder = await binance.futuresBuy("BTCUSDT", quantity,limitPrice, { newOrderRespType: "RESULT" });
       console.log("broughtOrder", broughtOrder);
 
-      const price = Number(broughtOrder.avgPrice) + profitTarget;
+      const price = Number(broughtOrder.price) + profitTarget;
       console.log("price ====> ", price);
 
-      const tpOrder = await binance.futuresSell("BTCUSDT", btcAmount, cmpBtc, { type: "TAKE_PROFIT_MARKET", stopprice: price, reduceOnly: true });
+      const tpOrder = await binance.futuresSell("BTCUSDT", btcAmount, limitPrice, { type: "TAKE_PROFIT",price:price, stopprice: price, reduceOnly: true });
       console.log("tpOrder", tpOrder);
 
       bot.sendMessage(chatId, `Trade Placed: ${broughtOrder.avgPrice}  ( ${broughtOrder.origQty} )  \n TP : ${tpOrder.stopPrice} `);
@@ -93,14 +94,15 @@ const automation = async () => {
       } else {
         quantity = btcAmount;
       }
-
-      const shortOrder = await binance.futuresSell("BTCUSDT", quantity, cmpBtc,{ newOrderRespType: "RESULT" });
+      const limitPrice =Math.floor(cmpBtc+5);
+      console.log(limitPrice)
+      const shortOrder = await binance.futuresSell("BTCUSDT", quantity, limitPrice,{ newOrderRespType: "RESULT" });
       console.log("shortOrder", shortOrder);
 
-      const price = Number(shortOrder.avgPrice) - profitTarget;
+      const price = Number(shortOrder.price) - profitTarget;
       console.log("price ====> ", price);
 
-      const tpOrder = await binance.futuresBuy("BTCUSDT", btcAmount,cmpBtc, { type: "TAKE_PROFIT_MARKET", stopprice: price, reduceOnly: true });
+      const tpOrder = await binance.futuresBuy("BTCUSDT", btcAmount,limitPrice, { type: "TAKE_PROFIT",price:price, stopprice: price, reduceOnly: true });
       console.log("tpOrder", tpOrder);
 
       bot.sendMessage(chatId, `Trade Placed: ${shortOrder.avgPrice} ( ${shortOrder.origQty} )  \n TP : ${tpOrder.stopPrice} `);
@@ -111,5 +113,5 @@ const automation = async () => {
   }
 };
 
-// const intervalId = setInterval(automation, 1 * 60 * 1000);
+const intervalId = setInterval(automation, 30 * 60 * 1000);
 automation();
