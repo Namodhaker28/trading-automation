@@ -44,7 +44,7 @@ bot.on("message", (msg) => {
 });
 
 const automation = async () => {
-  
+
   const tradeType = JSON.parse(fs.readFileSync("data.json", "utf-8")).side;
 
   if (!profitTarget) return;
@@ -55,8 +55,8 @@ const automation = async () => {
     // console.log(sma15, sma35)
 
     const openPosition = await binance.futuresPositionRisk({ symbol: "BTCUSDT" });
-    const cmpBtc = Number(openPosition[0]?.markPrice);
     console.log(openPosition);
+    const cmpBtc = Number(openPosition[0]?.markPrice);
 
     if (sma15 > sma35) {
       if (tradeType === "long" && Number(openPosition[0]?.positionAmt)) {
@@ -70,16 +70,15 @@ const automation = async () => {
         quantity = btcAmount;
       }
 
+
+      console.info(await binance.futuresCancelAll("BTCUSDT"));
+
       const limitPrice = Math.floor(cmpBtc - 5);
       console.log(limitPrice);
       const broughtOrder = await binance.futuresBuy("BTCUSDT", quantity, limitPrice, {
         newOrderRespType: "RESULT",
       });
       console.log("broughtOrder", broughtOrder);
-
-      if (broughtOrder.price) {
-        console.info(await binance.futuresCancelAll("BTCUSDT"));
-      }
 
       const price = Number(broughtOrder.price) + profitTarget;
       console.log("price ====> ", price);
@@ -107,16 +106,16 @@ const automation = async () => {
       } else {
         quantity = btcAmount;
       }
+
+        console.info(await binance.futuresCancelAll("BTCUSDT"));
+
+
       const limitPrice = Math.floor(cmpBtc + 5);
       console.log(limitPrice);
       const shortOrder = await binance.futuresSell("BTCUSDT", quantity, limitPrice, {
         newOrderRespType: "RESULT",
       });
       console.log("shortOrder", shortOrder);
-
-      if (shortOrder.price) {
-        console.info(await binance.futuresCancelAll("BTCUSDT"));
-      }
 
       const price = Number(shortOrder.price) - profitTarget;
       console.log("price ====> ", price);
