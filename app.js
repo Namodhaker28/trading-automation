@@ -37,18 +37,17 @@ bot.onText(/\/echo (.+)/, (msg, match) => {
   bot.sendMessage(chatId, resp);
 });
 
-bot.on('message', (msg)=>{
-  console.log(msg)
+bot.on("message", (msg) => {
+  console.log(msg);
   profitTarget = Number(msg.text);
   bot.sendMessage(chatId, `TP Updated to ${profitTarget} `);
-})
+});
 
 const automation = async () => {
-
+  
   const tradeType = JSON.parse(fs.readFileSync("data.json", "utf-8")).side;
-  // const cmp = await binance.futuresMarkPrice( "BTCUSDT" )
-  // const cmpBtc = Number(cmp?.markPrice)
-  // console.log("cmpBtc: ",cmpBtc)
+
+  if (!profitTarget) return;
 
   try {
     const sma15 = await getSimpleMovingAverage("BTCUSDT", "15m", 7);
@@ -56,8 +55,8 @@ const automation = async () => {
     // console.log(sma15, sma35)
 
     const openPosition = await binance.futuresPositionRisk({ symbol: "BTCUSDT" });
-    const cmpBtc = Number(openPosition[0]?.markPrice)
-    console.log(cmpBtc)
+    const cmpBtc = Number(openPosition[0]?.markPrice);
+    console.log(openPosition);
 
     if (sma15 > sma35) {
       if (tradeType === "long" && Number(openPosition[0]?.positionAmt)) {
@@ -65,24 +64,38 @@ const automation = async () => {
         return;
       }
       if (tradeType === "short" && Number(openPosition[0]?.positionAmt)) {
-        console.log(openPosition[0])
+        console.log(openPosition[0]);
         quantity = Number(openPosition[0].positionAmt) * 2 * -1;
       } else {
         quantity = btcAmount;
       }
 
-      const limitPrice =Math.floor(cmpBtc-5);
-      console.log(limitPrice)
-      const broughtOrder = await binance.futuresBuy("BTCUSDT", quantity,limitPrice, { newOrderRespType: "RESULT" });
+      const limitPrice = Math.floor(cmpBtc - 5);
+      console.log(limitPrice);
+      const broughtOrder = await binance.futuresBuy("BTCUSDT", quantity, limitPrice, {
+        newOrderRespType: "RESULT",
+      });
       console.log("broughtOrder", broughtOrder);
+
+      if (broughtOrder.price) {
+        console.info(await binance.futuresCancelAll("BTCUSDT"));
+      }
 
       const price = Number(broughtOrder.price) + profitTarget;
       console.log("price ====> ", price);
 
-      const tpOrder = await binance.futuresSell("BTCUSDT", btcAmount, limitPrice, { type: "TAKE_PROFIT",price:price, stopprice: price, reduceOnly: true });
+      const tpOrder = await binance.futuresSell("BTCUSDT", btcAmount, limitPrice, {
+        type: "TAKE_PROFIT",
+        price: price,
+        stopprice: price,
+        reduceOnly: true,
+      });
       console.log("tpOrder", tpOrder);
 
-      bot.sendMessage(chatId, `Trade Placed: ${broughtOrder.avgPrice}  ( ${broughtOrder.origQty} )  \n TP : ${tpOrder.stopPrice} `);
+      bot.sendMessage(
+        chatId,
+        `Trade Placed: ${broughtOrder.price}  ( ${broughtOrder.origQty} )  \n TP : ${tpOrder.stopPrice} `
+      );
       fs.writeFileSync("data.json", JSON.stringify({ side: "long" }, null, 2));
     } else {
       if (tradeType === "short" && Number(openPosition[0].positionAmt)) {
@@ -94,18 +107,32 @@ const automation = async () => {
       } else {
         quantity = btcAmount;
       }
-      const limitPrice =Math.floor(cmpBtc+5);
-      console.log(limitPrice)
-      const shortOrder = await binance.futuresSell("BTCUSDT", quantity, limitPrice,{ newOrderRespType: "RESULT" });
+      const limitPrice = Math.floor(cmpBtc + 5);
+      console.log(limitPrice);
+      const shortOrder = await binance.futuresSell("BTCUSDT", quantity, limitPrice, {
+        newOrderRespType: "RESULT",
+      });
       console.log("shortOrder", shortOrder);
+
+      if (shortOrder.price) {
+        console.info(await binance.futuresCancelAll("BTCUSDT"));
+      }
 
       const price = Number(shortOrder.price) - profitTarget;
       console.log("price ====> ", price);
 
-      const tpOrder = await binance.futuresBuy("BTCUSDT", btcAmount,limitPrice, { type: "TAKE_PROFIT",price:price, stopprice: price, reduceOnly: true });
+      const tpOrder = await binance.futuresBuy("BTCUSDT", btcAmount, limitPrice, {
+        type: "TAKE_PROFIT",
+        price: price,
+        stopprice: price,
+        reduceOnly: true,
+      });
       console.log("tpOrder", tpOrder);
 
-      bot.sendMessage(chatId, `Trade Placed: ${shortOrder.avgPrice} ( ${shortOrder.origQty} )  \n TP : ${tpOrder.stopPrice} `);
+      bot.sendMessage(
+        chatId,
+        `Trade Placed: ${shortOrder.price} ( ${shortOrder.origQty} )  \n TP : ${tpOrder.stopPrice} `
+      );
       fs.writeFileSync("data.json", JSON.stringify({ side: "short" }, null, 2));
     }
   } catch (error) {
@@ -113,5 +140,5 @@ const automation = async () => {
   }
 };
 
-const intervalId = setInterval(automation, 30 * 60 * 1000);
+const intervalId = setInterval(automation, 5 * 60 * 1000);
 automation();
