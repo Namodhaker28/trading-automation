@@ -58,6 +58,12 @@ const automation = async () => {
     console.log(openPosition);
     const cmpBtc = Number(openPosition[0]?.markPrice);
 
+    // if(Number(openPosition[0].positionAmt) > 0){
+    //   tradeType = "long"
+    // }else{
+    //   tradeType = "short"
+    // }
+
     if (sma15 > sma35) {
       if (tradeType === "long" && Number(openPosition[0]?.positionAmt)) {
         console.log("alredy long position is open");
@@ -83,9 +89,8 @@ const automation = async () => {
       const price = Number(broughtOrder.price) + profitTarget;
       console.log("price ====> ", price);
 
-      const tpOrder = await binance.futuresSell("BTCUSDT", btcAmount, limitPrice, {
+      const tpOrder = await binance.futuresSell("BTCUSDT", btcAmount,price, {
         type: "TAKE_PROFIT",
-        price: price,
         stopprice: price,
         reduceOnly: true,
       });
@@ -120,9 +125,8 @@ const automation = async () => {
       const price = Number(shortOrder.price) - profitTarget;
       console.log("price ====> ", price);
 
-      const tpOrder = await binance.futuresBuy("BTCUSDT", btcAmount, limitPrice, {
+      const tpOrder = await binance.futuresBuy("BTCUSDT", btcAmount,    price, {
         type: "TAKE_PROFIT",
-        price: price,
         stopprice: price,
         reduceOnly: true,
       });
