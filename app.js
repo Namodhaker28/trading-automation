@@ -140,5 +140,5 @@ const automation = async () => {
   }
 };
 
-// const intervalId = setInterval(automation, 5 * 60 * 1000);
+const intervalId = setInterval(automation, 5 * 60 * 1000);
 automation();
