@@ -19,7 +19,7 @@ const binance = new Binance().options({
   APISECRET: "4NmUo9uPGIgmurx58pbiHhDY9cr13whM3EWrD2ga9Rg07uB3ZTw3RYF7gPHp46rV",
 });
 
-let profitTarget = 250;
+let profitTarget = 300;
 let btcAmount = 0.005;
 let quantity;
 
@@ -44,7 +44,6 @@ bot.on("message", (msg) => {
 });
 
 const automation = async () => {
-
   const tradeType = JSON.parse(fs.readFileSync("data.json", "utf-8")).side;
 
   if (!profitTarget) return;
@@ -76,7 +75,6 @@ const automation = async () => {
         quantity = btcAmount;
       }
 
-
       console.info(await binance.futuresCancelAll("BTCUSDT"));
 
       const limitPrice = Math.floor(cmpBtc - 5);
@@ -89,8 +87,8 @@ const automation = async () => {
       const price = Number(broughtOrder.price) + profitTarget;
       console.log("price ====> ", price);
 
-      const tpOrder = await binance.futuresSell("BTCUSDT", btcAmount,price, {
-        type: "TAKE_PROFIT",
+      const tpOrder = await binance.futuresMarketSell("BTCUSDT", btcAmount, {
+        type: "TAKE_PROFIT_MARKET",
         stopprice: price,
         reduceOnly: true,
       });
@@ -112,8 +110,7 @@ const automation = async () => {
         quantity = btcAmount;
       }
 
-        console.info(await binance.futuresCancelAll("BTCUSDT"));
-
+      console.info(await binance.futuresCancelAll("BTCUSDT"));
 
       const limitPrice = Math.floor(cmpBtc + 5);
       console.log(limitPrice);
@@ -125,8 +122,8 @@ const automation = async () => {
       const price = Number(shortOrder.price) - profitTarget;
       console.log("price ====> ", price);
 
-      const tpOrder = await binance.futuresBuy("BTCUSDT", btcAmount,    price, {
-        type: "TAKE_PROFIT",
+      const tpOrder = await binance.futuresMarketBuy("BTCUSDT", btcAmount, {
+        type: "TAKE_PROFIT_MARKET",
         stopprice: price,
         reduceOnly: true,
       });
@@ -143,5 +140,5 @@ const automation = async () => {
   }
 };
 
-const intervalId = setInterval(automation, 5 * 60 * 1000);
+// const intervalId = setInterval(automation, 5 * 60 * 1000);
 automation();
