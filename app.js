@@ -77,7 +77,7 @@ const automation = async () => {
 
       console.info(await binance.futuresCancelAll("BTCUSDT"));
 
-      const limitPrice = Math.floor(cmpBtc - 5);
+      const limitPrice = Math.floor(cmpBtc - 20);
       console.log(limitPrice);
       const broughtOrder = await binance.futuresBuy("BTCUSDT", quantity, limitPrice, {
         newOrderRespType: "RESULT",
@@ -112,7 +112,7 @@ const automation = async () => {
 
       console.info(await binance.futuresCancelAll("BTCUSDT"));
 
-      const limitPrice = Math.floor(cmpBtc + 5);
+      const limitPrice = Math.floor(cmpBtc + 20);
       console.log(limitPrice);
       const shortOrder = await binance.futuresSell("BTCUSDT", quantity, limitPrice, {
         newOrderRespType: "RESULT",
